@@ -1,6 +1,6 @@
 [project]
 name = "queens-reasoner"
-version = "0.2.2"
+version = "0.2.3"
 authors = [
   { name="Xiurui Zhu", email="zxr6@163.com" },
 ]

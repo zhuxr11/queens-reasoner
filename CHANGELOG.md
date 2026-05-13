@@ -1,3 +1,9 @@
+## v0.2.3 (2026-05-13)
+
+### Fix
+
+- **queens_reasoner.reasoner**: Remove unused functions (previously commented).
+
 ## v0.2.2 (2026-05-13)
 
 ### Fix
