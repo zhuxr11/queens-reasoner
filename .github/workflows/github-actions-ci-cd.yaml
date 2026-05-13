@@ -38,13 +38,13 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: sdist
-          path: dist/queens-reasoner-*.tar.gz
+          path: dist/queens_reasoner-*.tar.gz
 
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v7
         with:
           name: wheel
-          path: dist/queens-reasoner-*.whl
+          path: dist/queens_reasoner-*.whl
 
   tests:
     name: Tests
