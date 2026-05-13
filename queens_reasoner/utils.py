@@ -3,7 +3,15 @@ import logging
 import numpy as np
 
 
-def create_logger(name: str):
+def create_logger(name: str) -> logging.Logger:
+    """Create and configure a logger with a standard format.
+
+    Args:
+        name (str): Logger name, typically in ``"package::module"`` format.
+
+    Returns:
+        logging.Logger: Configured logger instance.
+    """
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -14,7 +22,7 @@ def create_logger(name: str):
 def print_queens_solution(
     mat: np.ndarray,
     mask: np.ndarray,
-):
+) -> None:
     """Print a formatted Queens puzzle solution to the terminal.
 
     The board layout is displayed as a colored NumPy array where queen
@@ -24,23 +32,13 @@ def print_queens_solution(
     conditional coloring during NumPy array formatting.
 
     Args:
-        layout:
-            Sparse matrix representing the puzzle layout. Each entry
+        mat (np.ndarray): Sparse matrix of the puzzle layout. Each entry
             contains the integer color ID of a cell.
-
-        solution:
-            Dense binary NumPy array indicating queen placements.
-
-            - ``1`` indicates a queen.
-            - ``0`` indicates an empty cell.
-            - ``-1`` indicates an empty cell.
+        mask (np.ndarray): Dense matrix indicating queen placements.
+            ``1`` is a queen, ``0`` is a non-queen, ``-1`` is unknown.
 
     Returns:
         None
-
-    Notes:
-        Terminal coloring is implemented using ``colorama`` and
-        ``numpy.printoptions`` with a custom integer formatter.
     """
     mat_marked = (mat + 1) * (1 - mask * 2) + (mask < 0) * 10000
     with np.printoptions(
@@ -55,28 +53,21 @@ def mark_ndarray(x: int, marker: str = "*", anti_marker: str = "x") -> str:
     Negative values are highlighted using designated markers.
     Positive values are printed normally.
 
-    The displayed value is converted to its absolute value before applying
-    the optional offset.
-
     Args:
-        x:
-            Integer value to format.
-
-        marker:
-            Character as marker of queens.
-
-        anti_marker:
-            Character as marker of non-queens.
+        x (int): Integer value to format.
+        marker (str): Character used as the queen marker.
+        anti_marker (str): Character used as the non-queen marker.
 
     Returns:
-        Formatted string.
+        str: Formatted string.
 
     Example:
-        ```python
-        mark_ndarray(-3)
-        mark_ndarray(5)
-        mark_ndarray(10007)
-        ```
+        >>> mark_ndarray(-3)
+        '3*'
+        >>> mark_ndarray(5)
+        '5x'
+        >>> mark_ndarray(10007)
+        ' '
     """
     c = marker if x < 0 else (anti_marker if x < 10000 else " ")
     return f"{abs(x) if x <= 10000 else abs(x - 10000) // 3}{c}"

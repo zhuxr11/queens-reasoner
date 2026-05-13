@@ -12,24 +12,20 @@ def update_mask_whole_row_col(
     mat: np.ndarray,
     mask: np.ndarray,
 ) -> np.ndarray:
-    """
-    If a single color index occupies an entire row or column
-    (excluding elements that are impossible for queens),
-    then all other cells with the same color index outside that
-    row or column cannot contain queens.
+    """Eliminate queen candidates using whole-row/column color coverage.
 
+    If a single color index occupies an entire row or column (excluding
+    elements that are already ruled out), then all other cells with the
+    same color index outside that row or column cannot contain queens.
     Such cells are set to 0 in the returned mask.
 
     Args:
-        mat:
-            2D integer matrix of color indices.
-
-        mask:
-            2D mask matrix. Cells that cannot contain queens
-            will be set to 0.
+        mat (np.ndarray): 2D integer matrix of color indices.
+        mask (np.ndarray): 2D mask matrix. Cells that cannot contain queens
+            are set to 0.
 
     Returns:
-        Updated mask matrix.
+        np.ndarray: Updated mask matrix.
     """
     logger_row = create_logger("queens_reasoner::row_single_color")
     logger_col = create_logger("queens_reasoner::column_single_color")
@@ -103,27 +99,23 @@ def update_mask_other_row_col(
     mat: np.ndarray,
     mask: np.ndarray,
 ) -> np.ndarray:
-    """
+    """Deduce queen positions from single-candidate rows or columns.
+
     If all other candidate positions in a row or column are ruled out
-    except one remaining position, then that remaining position must
-    be a queen.
+    except one remaining position, that position must be a queen. After
+    marking a queen, conflicting positions are eliminated.
 
-    After marking a position as queen, eliminate conflicting positions.
-
-    Assumptions:
-        - mask == -1 : candidate / unknown
-        - mask == 0  : cannot be queen
-        - mask == 1  : confirmed queen
+    Mask values:
+        - ``-1``: candidate / unknown
+        - ``0``: cannot be queen
+        - ``1``: confirmed queen
 
     Args:
-        mat:
-            2D color matrix.
-
-        mask:
-            2D mask matrix.
+        mat (np.ndarray): 2D color matrix.
+        mask (np.ndarray): 2D mask matrix.
 
     Returns:
-        Updated mask matrix.
+        np.ndarray: Updated mask matrix.
     """
     logger_row = create_logger("queens_reasoner::row_one_candidate")
     logger_col = create_logger("queens_reasoner::column_one_candidate")
@@ -215,6 +207,18 @@ def update_mask_single_color(
     mat: np.ndarray,
     mask: np.ndarray,
 ) -> np.ndarray:
+    """Deduce queen positions from single-color constraints.
+
+    For each color with no confirmed queen, considers all possible queen
+    placements and identifies cells that must or cannot contain a queen.
+
+    Args:
+        mat (np.ndarray): 2D integer matrix of color indices.
+        mask (np.ndarray): 2D mask matrix.
+
+    Returns:
+        np.ndarray: Updated mask matrix.
+    """
     logger = create_logger("queens_reasoner::single_color_masking")
     new_mask = mask.copy()
 
@@ -263,6 +267,23 @@ def gen_mask_single_queen(
     row: int,
     col: int,
 ) -> np.ndarray:
+    """Generate a mask for a single queen placement.
+
+    Marks the given position as a queen (1) and eliminates all
+    conflicting positions in the same row, column, and diagonally
+    adjacent cells.
+
+    Args:
+        shape (tuple[int, int]): Board shape as ``(rows, cols)``.
+        row (int): Row index of the queen.
+        col (int): Column index of the queen.
+
+    Returns:
+        np.ndarray: Mask matrix with queen and non-queen positions marked.
+
+    Raises:
+        AssertionError: If ``row`` or ``col`` is out of bounds.
+    """
     assert row >= 0 and row < shape[0], (
         f"row index ({row + 1}) out of range; shape[0] = {shape[0]}"
     )
@@ -297,18 +318,17 @@ def gen_mask_single_queen(
     return res
 
 
-def reduce_masks(masks):
-    """
-    Reduce a list of ndarrays:
-    - if all values at a position are identical, keep the value
-    - otherwise set to -1
+def reduce_masks(masks: list[np.ndarray]) -> np.ndarray:
+    """Reduce a list of masks to their consensus.
+
+    At each position, if all masks agree on the value, keep it;
+    otherwise set to -1 (unknown).
 
     Args:
-        masks:
-            List of ndarrays with identical shapes.
+        masks (list[np.ndarray]): List of ndarrays with identical shapes.
 
     Returns:
-        ndarray
+        np.ndarray: Reduced mask.
     """
     res = masks[0].copy()
 
@@ -326,6 +346,19 @@ def update_mask_multi_color(
     mat: np.ndarray,
     mask: np.ndarray,
 ) -> np.ndarray:
+    """Apply multi-color constraint reasoning.
+
+    If k colors have all their possible queen positions confined to
+    k rows or k columns, then other colors cannot place queens in
+    those rows or columns.
+
+    Args:
+        mat (np.ndarray): 2D integer matrix of color indices.
+        mask (np.ndarray): 2D mask matrix.
+
+    Returns:
+        np.ndarray: Updated mask matrix.
+    """
     logger = create_logger("queens_reasoner::multi_color_masking")
 
     mask = mask.copy()
@@ -455,9 +488,20 @@ def update_mask_multi_color(
 def iter_min_subset(
     lst: list[np.ndarray],
 ) -> Iterator[tuple[str, tuple[int], tuple[int]]]:
-    """
-    Generator: yield subsets where union of rows or columns
-    <= number of arrays selected.
+    """Yield subsets where the union of rows or columns is minimal.
+
+    For each k from 1 to n, examines all k-combinations of arrays and
+    yields those where the number of unique rows or unique columns
+    is at most k.
+
+    Args:
+        lst (list[np.ndarray]): List of 2D position arrays, each with
+            shape ``(N, 2)`` where columns are ``[row, col]``.
+
+    Yields:
+        tuple[str, tuple[int], tuple[int]]: A tuple of
+        ``(orientation, unique_indices, selected_array_indices)``
+        where orientation is ``"row"`` or ``"column"``.
     """
     valid = [(idx, arr) for idx, arr in enumerate(lst) if arr.shape[0] > 0]
     if not valid:

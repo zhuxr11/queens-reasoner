@@ -52,6 +52,17 @@ def run(*args, **kwargs) -> None:
 def reason_queens_game(
     mat: np.ndarray,
 ) -> np.ndarray:
+    """Solve a Queens puzzle using iterative constraint reasoning.
+
+    Repeatedly applies four constraint-propagation rules until the mask
+    converges to a stable solution.
+
+    Args:
+        mat (np.ndarray): 2D integer matrix of color indices.
+
+    Returns:
+        np.ndarray: 2D mask matrix where 1 indicates a queen position.
+    """
     old_mask = np.zeros(shape=mat.shape, dtype=np.int64)
     new_mask = -np.ones(shape=mat.shape, dtype=np.int64)
     print_queens_solution(mat=mat, mask=new_mask)
