@@ -1,0 +1,228 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - "**"
+
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v8.1.0
+
+      - name: Setup Python
+        run: uv python install
+
+      - name: Sync dependencies
+        run: uv sync
+
+      - name: Install Playwright browsers
+        run: uv run install-playwright-browsers
+
+      - name: Build package
+        run: uv build
+
+      - name: Upload sdist artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: sdist
+          path: dist/queens-reasoner-*.tar.gz
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: wheel
+          path: dist/queens-reasoner-*.whl
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v8.1.0
+
+      - name: Setup Python
+        run: uv python install
+
+      - name: Sync dependencies
+        run: uv sync
+
+      - name: Install Playwright browsers
+        run: uv run install-playwright-browsers
+
+      - name: Run tests
+        run: |
+          uv run pytest -rP --log-cli-level=INFO --cov=. --cov-report=xml
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-xml
+          path: coverage.xml
+
+  check_author:
+    name: Get author name
+    runs-on: ubuntu-latest
+    needs: tests
+
+    outputs:
+      author: ${{ steps.author.outputs.author }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check commit author
+        id: author
+        run: |
+          AUTHOR=$(git log -1 --pretty=format:'%an')
+          echo "author=$AUTHOR" >> $GITHUB_OUTPUT
+
+  check_tag:
+    name: Get tag (v*) name
+    runs-on: ubuntu-latest
+    needs: tests
+
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag on current HEAD
+        id: tag
+        run: |
+          # Fetch tags
+          git fetch origin --tags
+          # Get the latest tag that starts with 'v'
+          TAG=$(git tag --sort=-creatordate | grep '^v' | head -n1)
+          # Get commit hash for this tag
+          TAG_COMMIT=$(git rev-list -n 1 $TAG)
+          # Get current HEAD commit hash
+          HEAD_COMMIT=$(git rev-parse HEAD)
+          echo "Latest tag: $TAG (commit $TAG_COMMIT)"
+          echo "Current HEAD: $HEAD_COMMIT"
+          if [ "$TAG_COMMIT" != "$HEAD_COMMIT" ]; then
+            echo "Tag $TAG does not point to current HEAD."
+            exit 0
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+  publish:
+    name: Publish Version
+    runs-on: ubuntu-latest
+    needs: check_author
+
+    if: |
+      github.ref == 'refs/heads/master' &&
+      needs.check_author.outputs.author != 'github-actions[bot]'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v8.1.0
+
+      - name: Setup Python
+        run: uv python install
+
+      - name: Sync dependencies
+        run: uv sync
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version and changelog
+        run: |
+          uv run cz bump --yes --changelog
+
+      - name: Get latest version tag
+        id: version
+        run: |
+          VERSION_TAG=$(git describe --tags --abbrev=0)
+          echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
+          echo "version_tag=$VERSION_TAG" >> $GITHUB_OUTPUT
+
+      - name: Commit bumped version
+        run: |
+          git add .
+          git commit -m "bump version to ${VERSION_TAG}" || echo "No changes to commit"
+
+      # Define a personal access token (PAT) as repository secret to push to protected branch (master)
+      - name: Push commits and tags
+        run: |
+          git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }} HEAD:master
+          git push --tags https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}
+
+      - name: Check if dev branch exists
+        id: check_dev
+        run: |
+          if git ls-remote --exit-code --heads origin dev; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Rebase dev onto master
+        if: steps.check_dev.outputs.exists == 'true'
+        run: |
+          git fetch origin master
+          git fetch origin dev
+          git checkout dev
+          git rebase origin/master
+          git push origin dev
+
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [check_author, check_tag]
+
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      needs.check_author.outputs.author == 'github-actions[bot]' &&
+      needs.check_tag.outputs.tag != ''
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Create release
+        uses: actions/create-release@v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.check_tag.outputs.tag }}
+          release_name: "${{ github.event.repository.name }} ${{ needs.check_tag.outputs.tag }}"
+          draft: false
+          prerelease: false
