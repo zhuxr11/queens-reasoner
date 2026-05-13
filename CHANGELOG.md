@@ -2,7 +2,7 @@
 
 ### Fix
 
-- **.github.workflows.github-actions-ci-cd**: fix typos in file names of artifacts from "build".
+- **.github.workflows.github-actions-ci-cd**: Fix typos in file names of artifacts from "build".
 
 ## v0.2.0 (2026-05-13)
 
