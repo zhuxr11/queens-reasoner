@@ -1,6 +1,6 @@
 # Queens Reasoner
 
-Queens Reasoner solves "Queens" game hosted on [linkedin](https://linkedin.com/games/queens) with linear programming, with step-by-step reasoning as humans.
+Queens Reasoner solves "Queens" game hosted on [linkedin](https://linkedin.com/games/queens) with step-by-step reasoning as humans.
 
 ## Installation
 
@@ -22,13 +22,13 @@ install-playwright-browsers
 
 ## Usage
 
-The Queens Reasoner automatically loads the "Queens" game hosted daily. To call the reasoner, run:
+The Queens Reasoner automatically loads the "Queens" game hosted daily. To call the reasoners, run:
 
 ``` {bash}
 queens-reasoner
 ```
 
-The reasoner first loads the game, then solves it, and finally validates the solution on the hosted webpage. Positions of queens are marked by asterisks to the right of color index, while others are marked by "x". In contrast to Queens Solver ("queens-slvr", which solves the game with linear programming), you may see the step-by-step reasoning process with Queens Reasoner. An example output looks like:
+The reasoner first loads the game, then solves it, and finally validates the solution on the hosted webpage. Positions of queens are marked by asterisks to the right of color index, while others are marked by "x". In contrast to Queens Solver ("[queens-slvr](https://github.com/zhuxr11/queens_solver)", which solves the game with linear programming), you may see the step-by-step reasoning process with Queens Reasoner. An example output looks like:
 
 ```
 2026-05-13 09:43:01,303 [INFO] queens_browser: Page loaded from: https://linkedin.com/games/view/queens/desktop
