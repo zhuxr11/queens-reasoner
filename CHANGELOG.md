@@ -1,3 +1,9 @@
+## v0.3.1 (2026-05-18)
+
+### Fix
+
+- **tests.test_reasoner**: Use a more comprehensive test array for reasoner tests.
+
 ## v0.3.0 (2026-05-18)
 
 ### Feat
