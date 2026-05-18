@@ -1,0 +1,34 @@
+queens_reasoner.setup
+=====================
+
+.. py:module:: queens_reasoner.setup
+
+.. autoapi-nested-parse::
+
+   Setup utilities for Queens Reasoner.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   queens_reasoner.setup.install_playwright_browsers_
+
+
+Module Contents
+---------------
+
+.. py:function:: install_playwright_browsers_(*args, **kwargs)
+
+   Install Playwright browsers for the Queens Reasoner.
+
+   Delegates to ``queens_solver.setup.install_playwright_browsers``.
+
+   :param \*args: Positional arguments forwarded to the underlying installer.
+   :param \*\*kwargs: Keyword arguments forwarded to the underlying installer.
+
+   :returns: None
+
+

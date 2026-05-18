@@ -1,0 +1,149 @@
+queens_reasoner.reasoner
+========================
+
+.. py:module:: queens_reasoner.reasoner
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   queens_reasoner.reasoner.update_mask_whole_row_col
+   queens_reasoner.reasoner.update_mask_other_row_col
+   queens_reasoner.reasoner.update_mask_single_color
+   queens_reasoner.reasoner.gen_mask_single_queen
+   queens_reasoner.reasoner.reduce_masks
+   queens_reasoner.reasoner.update_mask_multi_color
+   queens_reasoner.reasoner.iter_min_subset
+
+
+Module Contents
+---------------
+
+.. py:function:: update_mask_whole_row_col(mat, mask)
+
+   Eliminate queen candidates using whole-row/column color coverage.
+
+   If a single color index occupies an entire row or column (excluding
+   elements that are already ruled out), then all other cells with the
+   same color index outside that row or column cannot contain queens.
+   Such cells are set to 0 in the returned mask.
+
+   :param mat: 2D integer matrix of color indices.
+   :type mat: np.ndarray
+   :param mask: 2D mask matrix. Cells that cannot contain queens
+                are set to 0.
+   :type mask: np.ndarray
+
+   :returns: Updated mask matrix.
+   :rtype: np.ndarray
+
+
+.. py:function:: update_mask_other_row_col(mat, mask)
+
+   Deduce queen positions from single-candidate rows or columns.
+
+   If all other candidate positions in a row or column are ruled out
+   except one remaining position, that position must be a queen. After
+   marking a queen, conflicting positions are eliminated.
+
+   Mask values:
+       - ``-1``: candidate / unknown
+       - ``0``: cannot be queen
+       - ``1``: confirmed queen
+
+   :param mat: 2D color matrix.
+   :type mat: np.ndarray
+   :param mask: 2D mask matrix.
+   :type mask: np.ndarray
+
+   :returns: Updated mask matrix.
+   :rtype: np.ndarray
+
+
+.. py:function:: update_mask_single_color(mat, mask)
+
+   Deduce queen positions from single-color constraints.
+
+   For each color with no confirmed queen, considers all possible queen
+   placements and identifies cells that must or cannot contain a queen.
+
+   :param mat: 2D integer matrix of color indices.
+   :type mat: np.ndarray
+   :param mask: 2D mask matrix.
+   :type mask: np.ndarray
+
+   :returns: Updated mask matrix.
+   :rtype: np.ndarray
+
+
+.. py:function:: gen_mask_single_queen(shape, row, col)
+
+   Generate a mask for a single queen placement.
+
+   Marks the given position as a queen (1) and eliminates all
+   conflicting positions in the same row, column, and diagonally
+   adjacent cells.
+
+   :param shape: Board shape as ``(rows, cols)``.
+   :type shape: tuple[int, int]
+   :param row: Row index of the queen.
+   :type row: int
+   :param col: Column index of the queen.
+   :type col: int
+
+   :returns: Mask matrix with queen and non-queen positions marked.
+   :rtype: np.ndarray
+
+   :raises AssertionError: If ``row`` or ``col`` is out of bounds.
+
+
+.. py:function:: reduce_masks(masks)
+
+   Reduce a list of masks to their consensus.
+
+   At each position, if all masks agree on the value, keep it;
+   otherwise set to -1 (unknown).
+
+   :param masks: List of ndarrays with identical shapes.
+   :type masks: list[np.ndarray]
+
+   :returns: Reduced mask.
+   :rtype: np.ndarray
+
+
+.. py:function:: update_mask_multi_color(mat, mask)
+
+   Apply multi-color constraint reasoning.
+
+   If k colors have all their possible queen positions confined to
+   k rows or k columns, then other colors cannot place queens in
+   those rows or columns.
+
+   :param mat: 2D integer matrix of color indices.
+   :type mat: np.ndarray
+   :param mask: 2D mask matrix.
+   :type mask: np.ndarray
+
+   :returns: Updated mask matrix.
+   :rtype: np.ndarray
+
+
+.. py:function:: iter_min_subset(lst)
+
+   Yield subsets where the union of rows or columns is minimal.
+
+   For each k from 1 to n, examines all k-combinations of arrays and
+   yields those where the number of unique rows or unique columns
+   is at most k.
+
+   :param lst: List of 2D position arrays, each with
+               shape ``(N, 2)`` where columns are ``[row, col]``.
+   :type lst: list[np.ndarray]
+
+   :Yields: *tuple[str, tuple[int], tuple[int]]* -- A tuple of
+            ``(orientation, unique_indices, selected_array_indices)``
+            where orientation is ``"row"`` or ``"column"``.
+
+

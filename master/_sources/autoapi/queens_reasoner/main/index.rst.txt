@@ -1,0 +1,51 @@
+queens_reasoner.main
+====================
+
+.. py:module:: queens_reasoner.main
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   queens_reasoner.main.run
+   queens_reasoner.main.reason_queens_game
+
+
+Module Contents
+---------------
+
+.. py:function:: run(*args, **kwargs)
+
+   Run the complete Queens puzzle solving pipeline.
+
+   This function:
+
+   1. Parses a Queens puzzle board from the target source.
+   2. Solves the puzzle using reasoner.
+   3. Prints the formatted solution to the terminal.
+
+   Positional and keyword arguments are forwarded directly to
+   ``parse_queens_game``.
+
+   :param \*args: Positional arguments passed to ``parse_queens_game``.
+   :param \*\*kwargs: Keyword arguments passed to ``parse_queens_game``.
+
+   :returns: None
+
+
+.. py:function:: reason_queens_game(mat)
+
+   Solve a Queens puzzle using iterative constraint reasoning.
+
+   Repeatedly applies four constraint-propagation rules until the mask
+   converges to a stable solution.
+
+   :param mat: 2D integer matrix of color indices.
+   :type mat: np.ndarray
+
+   :returns: 2D mask matrix where 1 indicates a queen position.
+   :rtype: np.ndarray
+
+

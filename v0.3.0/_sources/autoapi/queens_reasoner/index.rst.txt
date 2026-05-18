@@ -1,0 +1,48 @@
+queens_reasoner
+===============
+
+.. py:module:: queens_reasoner
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/queens_reasoner/main/index
+   /autoapi/queens_reasoner/reasoner/index
+   /autoapi/queens_reasoner/setup/index
+   /autoapi/queens_reasoner/utils/index
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   queens_reasoner.run
+
+
+Package Contents
+----------------
+
+.. py:function:: run(*args, **kwargs)
+
+   Run the complete Queens puzzle solving pipeline.
+
+   This function:
+
+   1. Parses a Queens puzzle board from the target source.
+   2. Solves the puzzle using reasoner.
+   3. Prints the formatted solution to the terminal.
+
+   Positional and keyword arguments are forwarded directly to
+   ``parse_queens_game``.
+
+   :param \*args: Positional arguments passed to ``parse_queens_game``.
+   :param \*\*kwargs: Keyword arguments passed to ``parse_queens_game``.
+
+   :returns: None
+
+

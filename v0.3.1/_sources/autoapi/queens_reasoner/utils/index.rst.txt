@@ -1,0 +1,77 @@
+queens_reasoner.utils
+=====================
+
+.. py:module:: queens_reasoner.utils
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   queens_reasoner.utils.create_logger
+   queens_reasoner.utils.print_queens_solution
+   queens_reasoner.utils.mark_ndarray
+
+
+Module Contents
+---------------
+
+.. py:function:: create_logger(name)
+
+   Create and configure a logger with a standard format.
+
+   :param name: Logger name, typically in ``"package::module"`` format.
+   :type name: str
+
+   :returns: Configured logger instance.
+   :rtype: logging.Logger
+
+
+.. py:function:: print_queens_solution(mat, mask)
+
+   Print a formatted Queens puzzle solution to the terminal.
+
+   The board layout is displayed as a colored NumPy array where queen
+   positions are highlighted using terminal color formatting.
+
+   Internally, queen cells are represented as negative values to allow
+   conditional coloring during NumPy array formatting.
+
+   :param mat: Sparse matrix of the puzzle layout. Each entry
+               contains the integer color ID of a cell.
+   :type mat: np.ndarray
+   :param mask: Dense matrix indicating queen placements.
+                ``1`` is a queen, ``0`` is a non-queen, ``-1`` is unknown.
+   :type mask: np.ndarray
+
+   :returns: None
+
+
+.. py:function:: mark_ndarray(x, marker = '*', anti_marker = 'x')
+
+   Format an integer value with optional terminal coloring.
+
+   Negative values are highlighted using designated markers.
+   Positive values are printed normally.
+
+   :param x: Integer value to format.
+   :type x: int
+   :param marker: Character used as the queen marker.
+   :type marker: str
+   :param anti_marker: Character used as the non-queen marker.
+   :type anti_marker: str
+
+   :returns: Formatted string.
+   :rtype: str
+
+   .. rubric:: Example
+
+   >>> mark_ndarray(-3)
+   '3*'
+   >>> mark_ndarray(5)
+   '5x'
+   >>> mark_ndarray(10007)
+   ' '
+
+
