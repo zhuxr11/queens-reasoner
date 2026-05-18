@@ -2,7 +2,7 @@
 
 ### Feat
 
-- **docs**: add "sphinx-multiversion" documentation.
+- **docs**: Add "sphinx-multiversion" documentation.
 
 ## v0.2.3 (2026-05-13)
 
